@@ -77,7 +77,7 @@ export class Manager {
     const inhibitMatchers = untypedConfig.get(`inhibitMatchers`)
     if (inhibitMatchers === undefined) return
 
-    const promises = [untypedConfig.update(`inhibitMatchers`, undefined, true)]
+    const promises = [ untypedConfig.update(`inhibitMatchers`, undefined, true) ]
 
     if (Array.isArray(inhibitMatchers)) {
       const textMateRules = inhibitMatchers.reduce((acc: Array<MatchRule>, value) => {
@@ -88,7 +88,7 @@ export class Manager {
       }, [])
 
       if (textMateRules.length > 0) {
-        const newRules = [...Manager.configuration.textMateRules, ...textMateRules].reduce(
+        const newRules = [ ...Manager.configuration.textMateRules, ...textMateRules ].reduce(
           (acc: MatchRule[], rule, index, array) => {
             const otherRules = array.slice(index + 1)
             if (!otherRules.some((otherRule) => areRulesEquivalent(rule, otherRule))) {
@@ -316,7 +316,7 @@ export class Manager {
       )
 
     const { document, selection } = editor
-    const caretScopes = [...new Set(this.hscopes.getScopeAt(document, selection.active)?.scopes ?? [])]
+    const caretScopes = [ ...new Set(this.hscopes.getScopeAt(document, selection.active)?.scopes ?? []) ]
     if (!caretScopes.length) return await window.showErrorMessage(`No scopes found at the current selection.`)
 
     const { regexp, string } = this.configuration.textMateRules.reduce(
@@ -336,7 +336,7 @@ export class Manager {
 
     const stringRulesNotAtCaret = string.filter((item) => item.type === 'string' && !caretScopes.includes(item.value))
     const stringRulesAtCaret = string.filter((item) => item.type === 'string' && caretScopes.includes(item.value))
-    const finalRules = [...regexp, ...stringRulesNotAtCaret]
+    const finalRules = [ ...regexp, ...stringRulesNotAtCaret ]
 
     const quickPickItems = caretScopes.map(
       (scope): QuickPickItem => ({
@@ -469,6 +469,12 @@ export class Manager {
     scope: ConfigurationScope | undefined | null
   ): Promise<void> {
     const log = this.createLogger('updateCopilotState')
+    if (!Manager.configuration.active) {
+      log(`Extension is inactive, skipping updateCopilotState call.`)
+      this.statusBarItem.tooltip  = `GH Copilot Suggestions (Extension Inactive)`
+      this.statusBarItem.text = `Suggestions Toggling Inactive`
+      return
+    }
     log(`Setting Copilot Inline Suggestions to: ${state}, Reason: ${reason}`)
 
     this.statusBarItem.tooltip = state
